@@ -58,7 +58,14 @@ class NetworkStatusCheck(StatusCheck):
                 if self.expected_reply_b64:
                     self.expected_reply = self.expected_reply.decode('base64')
 
-                received_response = s.read()
+                # here we only read as many bytes as the length of the
+                # expected response. This is done for convenience - sometimes
+                # a server's reply can be pretty long, and if you only care
+                # about the beginning of the message, there's no need to look
+                # into the remaining part. For example, in the case of HTTP
+                # what we expect is `HTTP/1.1 200 OK` and we ignore the rest of
+                # the response
+                received_response = s.read(len(self.expected_reply))
                 if received_response == self.expected_reply:
                     result.succeeded = True
                 else:
