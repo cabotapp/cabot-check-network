@@ -83,7 +83,7 @@ class NetworkStatusCheck(StatusCheck):
                 if received_response == self.expected_reply:
                     result.succeeded = True
                 else:
-                    result.error = u'Got unexpected response %s' % repr(received_response)
+                    result.error = u'Got unexpected response %r' % (received_response,)
                     result.succeeded = False
 
             result.succeeded = True
