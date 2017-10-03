@@ -17,30 +17,35 @@ class NetworkStatusCheck(StatusCheck):
         help_text='Port to check.',
     )
 
-    # if set, this message will be sent to the server after the connection
-    # is established. Should default to None or an empty string
-    message_to_send = models.TextField(
-        help_text='Message to send after connection (optional).'
-    )
-    message_to_send_b64 = models.BooleanField(
-        help_text='Message to send is encoded in base64.'
-    )
 
-    # if set, we shall expect the server to respond with this message, for
-    # the test to be considered successful
-    expected_reply = models.TextField(
-        help_text='Expect the server to reply with this (optional).'
-    )
-    expected_reply_b64 = models.BooleanField(
-        help_text='Expected response is encoded in base64.'
-    )
-
+    # Optional checks that look into the application-layer payload, not
+    # just the mere fact that a transport-layer connection was established.
 
     # General note on the format of these messages. Typically you want to
     # send a string, but for some protocols you might want to send a binary
     # message consisting of non-printing characters. If that is your case,
     # encode the strings in base64, they will be decoded and used further
     # in the check
+
+    # if set, this message will be sent to the server after the connection
+    # is established. Should default to None or an empty string
+    message_to_send = models.TextField(
+        help_text='Message to send after connection (optional).',
+    )
+    message_to_send_b64 = models.BooleanField(
+        help_text='Message to send is encoded in base64.',
+    )
+
+    # if set, we shall expect the server to respond with this message, for
+    # the test to be considered successful
+    expected_reply = models.TextField(
+        help_text='Expect the server to reply with this (optional).',
+    )
+    expected_reply_b64 = models.BooleanField(
+        help_text='Expected response is encoded in base64.',
+    )
+
+
 
     def _run(self):
         result = StatusCheckResult(status_check=self)
@@ -52,8 +57,7 @@ class NetworkStatusCheck(StatusCheck):
             result.succeeded = False
         else:
             # the connection was successful, refine the check by verifying
-            # if there are any other success criteria and if they are satisfied
-
+            # if other success criteria are satisfied (if any)
 
             # here we verify whether the check consists of sending a message to
             # the server or not, and whether it is a binay payload or not
@@ -62,6 +66,8 @@ class NetworkStatusCheck(StatusCheck):
                     self.message_to_send = self.message_to_send.decode('base64')
                 s.send(self.message_to_send)
 
+            # probe it further, by comparing the received response with the
+            # expected one
             if self.expected_reply:
                 if self.expected_reply_b64:
                     self.expected_reply = self.expected_reply.decode('base64')
