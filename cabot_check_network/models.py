@@ -18,14 +18,22 @@ class NetworkStatusCheck(StatusCheck):
     )
 
     # if set, this message will be sent to the server after the connection
-    # is established
-    message_to_send = None
-    message_to_send_b64 = False
+    # is established. Should default to None or an empty string
+    message_to_send = models.TextField(
+        help_text='Message to send after connection (optional).'
+    )
+    message_to_send_b64 = models.BooleanField(
+        help_text='Message to send is encoded in base64.'
+    )
 
     # if set, we shall expect the server to respond with this message, for
     # the test to be considered successful
-    expected_reply = None
-    expected_reply_b64 = False
+    expected_reply = models.TextField(
+        help_text='Expect the server to reply with this (optional).'
+    )
+    expected_reply_b64 = models.BooleanField(
+        help_text='Expected response is encoded in base64.'
+    )
 
 
     # General note on the format of these messages. Typically you want to
@@ -69,6 +77,7 @@ class NetworkStatusCheck(StatusCheck):
                 if received_response == self.expected_reply:
                     result.succeeded = True
                 else:
+                    result.error = u'Got unexpected response %s' % repr(received_response)
                     result.succeeded = False
 
             result.succeeded = True
